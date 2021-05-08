@@ -55,3 +55,19 @@ Criar funcionalidade para o aluno avaliar o curso seguindo as seguintes regras: 
 Você encontrará vários situações onde o código deverá ser melhorado ou até mesmo ajustado.
 Para facilitar, coloquei no código #pegabandeira. Essa hashtag apenas indica que tem algo que precisa ser ajustado/melhorado.
 Você terá de descobrir o que precisa ser feito
+
+# Nao precisa mexer
+
+backend:
+database.ts
+database.json
+exceptions \*
+repository.ts
+config.ts
+tipo-usuario.enum.ts
+utils.ts
+mensagem.ts
+auth.middleware.ts
+entity.ts
+index.ts
+nodemon.json
