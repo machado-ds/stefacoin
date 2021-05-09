@@ -1,6 +1,7 @@
 import Professor from '../entities/professor.entity';
 import ProfessorRepository from '../repositories/professor.repository';
 import { FilterQuery } from '../utils/database/database';
+import BusinessException from '../utils/exceptions/business.exception';
 import Mensagem from '../utils/mensagem';
 import { Validador } from '../utils/utils';
 import { ProfessorValidator } from '../utils/validators/professor.validator';
@@ -45,7 +46,7 @@ export default class ProfessorController {
       nome,
       email,
       senha
-    } as Professor
+    } as Professor 
 
     const id = await ProfessorRepository.incluir(novoProfessor);
 
@@ -55,11 +56,26 @@ export default class ProfessorController {
   }
 
   async alterar(id: number, professor: Professor) {
-    const { nome, email, senha } = professor;
+    const nome = professor.nome.trim();
+    const email = professor.email.trim();
+    const senha = professor.email.trim();
+
+    const professorBuscado = await this.obterPorId(id);
 
     Validador.validarParametros([{ id }, { nome }, { email }, { senha }]);
+    ProfessorValidator.validarNome(nome);
 
-    await ProfessorRepository.alterar({ id }, professor);
+    if (email != professorBuscado.email) {
+      throw new BusinessException('O email não pode ser alterado.');
+    }
+
+    let professorAlterado: Professor = {
+      nome,
+      email,
+      senha
+    } as Professor 
+
+    await ProfessorRepository.alterar({ id }, professorAlterado);
 
     return new Mensagem('Professor alterado com sucesso!', {
       id,
@@ -68,6 +84,12 @@ export default class ProfessorController {
 
   async excluir(id: number) {
     Validador.validarParametros([{ id }]);
+
+    const professorBuscado = await this.obterPorId(id);
+
+    if (professorBuscado.cursos && professorBuscado.cursos.length) {
+      throw new BusinessException('Não é possível excluir um professor que esteja vinculado a um curso.');
+    }
 
     await ProfessorRepository.excluir({ id });
 

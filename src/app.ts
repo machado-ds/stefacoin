@@ -39,7 +39,8 @@ class App {
           res.status(err.status).json({ message: err.message, status: err.status });
         } else {
           // evite utilizar o Error diretamente. De preferencia para as Exceptions
-          res.status(400).json({ message: err.message, status: 400 });
+          //Caso o erro não seja uma instância de uma das Exceptions do sistema, o problema está no lado do servidor, por isso utiliza-se o código 500.
+          res.status(500).json({ message: err.message, status: 500 });
         }
       }
       next();
