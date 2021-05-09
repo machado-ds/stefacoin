@@ -7,7 +7,7 @@ import Repository from './repository';
 
 class ProfessorRepository extends Repository<Professor> {
   constructor() {
-    super(Tables.USUARIO);
+    super(Tables.PROFESSOR);
   }
 
   async incluir(professor: Professor) {
