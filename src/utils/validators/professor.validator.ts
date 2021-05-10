@@ -1,4 +1,3 @@
-import ProfessorController from '../../controllers/professor.controller';
 import Professor from '../../entities/professor.entity';
 import BusinessException from '../exceptions/business.exception';
 
@@ -17,5 +16,19 @@ export const ProfessorValidator = {
             throw new BusinessException('Já existe um professor com esse endereço de email.');
         }
         return true;
+    },
+
+    validarIdProfessor: (idProfessor: number, professores: Professor[]) => {
+        let professorEncontrado: Professor = undefined;
+        professores.forEach(professor => {
+            if (professor.id === idProfessor) {
+                professorEncontrado = professor;
+            }
+        })
+        if (!professorEncontrado) {
+            throw new BusinessException('O professor informado não existe.');
+        } else {
+            return true;
+        }
     }
 };

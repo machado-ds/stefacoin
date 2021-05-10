@@ -2,6 +2,7 @@ import Aula from '../models/aula.model';
 import CursoRepository from '../repositories/curso.repository';
 import Mensagem from '../utils/mensagem';
 import { Validador } from '../utils/utils';
+import { AulaValidator } from '../utils/validators/aula.validator';
 
 export default class AulaController {
   async obterPorId(id: number, idCurso: number): Promise<Aula> {
@@ -17,14 +18,25 @@ export default class AulaController {
   }
 
   async incluir(aula: Aula) {
-    const { nome, duracao, topicos, idCurso } = aula;
+    let { nome, duracao, topicos, idCurso } = aula;
+
+    //Checar se o nome já existe, se os tópicos estão em forma de lista e se o id do curso existe.
     Validador.validarParametros([{ nome }, { duracao }, { topicos }, { idCurso }]);
+
+    nome = nome.trim();
+    topicos = topicos.map(topico => topico.trim());
 
     const curso = await CursoRepository.obterPorId(idCurso);
 
-    const idAnterior = curso.aulas[curso.aulas.length - 1].id;
-    aula.id = idAnterior ? idAnterior + 1 : 1;
-    curso.aulas.push(aula);
+    if (curso.aulas.length) {
+      AulaValidator.validarNome(nome, curso.aulas);
+      const idAnterior = curso.aulas[curso.aulas.length - 1].id;
+      aula.id = idAnterior + 1;
+      curso.aulas.push(aula);
+    } else {
+      aula.id = 1;
+      curso.aulas.push(aula);
+    }
 
     await CursoRepository.alterar({ id: idCurso }, curso);
 

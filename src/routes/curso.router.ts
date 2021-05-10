@@ -5,7 +5,7 @@ import Mensagem from '../utils/mensagem';
 
 const router = express.Router();
 
-router.post('/curso', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/cursos', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const mensagem: Mensagem = await new CursoController().incluir(req.body);
     res.json(mensagem);
@@ -14,7 +14,7 @@ router.post('/curso', async (req: Request, res: Response, next: NextFunction) =>
   }
 });
 
-router.put('/curso/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/cursos/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const mensagem: Mensagem = await new CursoController().alterar(Number(id), req.body);
@@ -24,7 +24,7 @@ router.put('/curso/:id', async (req: Request, res: Response, next: NextFunction)
   }
 });
 
-router.delete('/curso/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/cursos/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const mensagem: Mensagem = await new CursoController().excluir(Number(id));
@@ -34,7 +34,7 @@ router.delete('/curso/:id', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-router.get('/curso/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/cursos/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const curso: Curso = await new CursoController().obterPorId(Number(id));
@@ -44,7 +44,7 @@ router.get('/curso/:id', async (req: Request, res: Response, next: NextFunction)
   }
 });
 
-router.get('/curso', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/cursos', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cursos: Curso[] = await new CursoController().listar();
     res.json(cursos);
