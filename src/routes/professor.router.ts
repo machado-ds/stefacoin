@@ -46,7 +46,7 @@ router.get('/professor/:id', async (req: Request, res: Response, next: NextFunct
 
 router.get('/professor', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const professores: Professor[] = await new ProfessorController().listar();
+    const professores: Professor[] = await new ProfessorController().listar({tipo: {$eq: 1}});
     const professoresSemSenha: Professor[] = professores.map(professor => {
       let {senha, ...professorSemSenha} = professor;
       return professorSemSenha as Professor;
