@@ -3,16 +3,26 @@ import CursoRepository from '../repositories/curso.repository';
 import Mensagem from '../utils/mensagem';
 import { Validador } from '../utils/utils';
 import { AulaValidator } from '../utils/validators/aula.validator';
+import { CursoValidator } from '../utils/validators/curso.validator';
 
 export default class AulaController {
   async obterPorId(id: number, idCurso: number): Promise<Aula> {
     Validador.validarParametros([{ id }, { idCurso }]);
+
+    const listaDeCursos = await CursoRepository.listar();
+    AulaValidator.validarIdCurso(idCurso, listaDeCursos);
+
+    const listaDeAulas = await this.listar(idCurso);
+    AulaValidator.validarIdDaAula(id, listaDeAulas);
+
     const curso = await CursoRepository.obterPorId(idCurso);
     return curso.aulas.find((a) => a.id === id);
   }
 
   async listar(idCurso: number): Promise<Aula[]> {
     Validador.validarParametros([{ idCurso }]);
+    const listaDeCursos = await CursoRepository.listar();
+    AulaValidator.validarIdCurso(idCurso, listaDeCursos);
     const curso = await CursoRepository.obterPorId(idCurso);
     return curso.aulas;
   }
@@ -40,17 +50,23 @@ export default class AulaController {
 
     await CursoRepository.alterar({ id: idCurso }, curso);
 
-    return new Mensagem('Aula incluido com sucesso!', {
+    return new Mensagem('Aula incluida com sucesso!', {
       id: aula.id,
       idCurso,
     });
   }
 
   async alterar(id: number, aula: Aula) {
-    const { nome, duracao, topicos, idCurso } = aula;
+    let { nome, duracao, topicos, idCurso } = aula;
     Validador.validarParametros([{ id }, { idCurso }, { nome }, { duracao }, { topicos }]);
 
+    nome = nome.trim();
+
+    const listaDeCursos = await CursoRepository.listar();
+    CursoValidator.validarIdDoCurso(idCurso, listaDeCursos);
+
     const curso = await CursoRepository.obterPorId(idCurso);
+    AulaValidator.validarIdDaAula(id, curso.aulas);
 
     curso.aulas.map((a) => {
       if (a.id === id) {
@@ -62,7 +78,7 @@ export default class AulaController {
 
     await CursoRepository.alterar({ id: idCurso }, curso);
 
-    return new Mensagem('Aula alterado com sucesso!', {
+    return new Mensagem('Aula alterada com sucesso!', {
       id,
       idCurso,
     });
@@ -71,12 +87,18 @@ export default class AulaController {
   async excluir(id: number, idCurso: number) {
     Validador.validarParametros([{ id }, { idCurso }]);
 
+    const listaDeCursos = await CursoRepository.listar();
+    AulaValidator.validarIdCurso(idCurso, listaDeCursos);
+
+    const listaDeAulas = await this.listar(idCurso);
+    AulaValidator.validarIdDaAula(id, listaDeAulas);
+
     const curso = await CursoRepository.obterPorId(idCurso);
 
     curso.aulas = curso.aulas.filter((a) => a.id !== id);
 
     await CursoRepository.alterar({ id: idCurso }, curso);
 
-    return new Mensagem('Aula excluido com sucesso!');
+    return new Mensagem('Aula excluida com sucesso!');
   }
 }

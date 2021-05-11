@@ -6,10 +6,16 @@ import { Validador } from '../utils/utils';
 import { CursoValidator } from '../utils/validators/curso.validator';
 import AulaController from '../controllers/aula.controller';
 import ProfessorRepository from '../repositories/professor.repository';
+import { AulaValidator } from '../utils/validators/aula.validator';
+import BusinessException from '../utils/exceptions/business.exception';
+import Aluno from '../entities/aluno.entity';
 
 export default class CursoController {
+
   async obterPorId(id: number): Promise<Curso> {
     Validador.validarParametros([{ id }]);
+    const listaDeCursos = await this.listar();
+    CursoValidator.validarIdDoCurso(id, listaDeCursos);
     return await CursoRepository.obterPorId(id);
   }
 
@@ -30,7 +36,7 @@ export default class CursoController {
     nome = nome.trim();
     descricao = descricao.trim();
 
-    const listaDeProfessores = await ProfessorRepository.listar();
+    const listaDeProfessores = await ProfessorRepository.listar({tipo: {$eq: 1}});
     const listaDeCursos = await this.listar();
 
     CursoValidator.validarAulas(aulas);
@@ -49,9 +55,7 @@ export default class CursoController {
     for (let index = 0; index < aulas.length; index++) {
       const aula = aulas[index];
       aula.idCurso = id;
-      
-      const mensagem = await new AulaController().incluir(aula);
-
+      await new AulaController().incluir(aula);
     }
 
     return new Mensagem('Curso incluido com sucesso!', {
@@ -60,12 +64,38 @@ export default class CursoController {
   }
 
   async alterar(id: number, curso: Curso) {
-    const { nome, descricao, aulas, idProfessor } = curso;
+    let { nome, descricao, aulas, idProfessor } = curso;
+    const listaDeCursos = await this.listar();
+    CursoValidator.validarIdDoCurso(id, listaDeCursos);
+
     Validador.validarParametros([{ id }, { nome }, { descricao }, { aulas }, { idProfessor }]);
 
-    await CursoRepository.alterar({ id }, curso);
+    nome = nome.trim();
+    descricao = descricao.trim();
 
-    return new Mensagem('Aula alterado com sucesso!', {
+    const listaDeProfessores = await ProfessorRepository.listar({tipo: {$eq: 1}});
+    CursoValidator.validarIdProfessor(idProfessor, listaDeProfessores);
+
+    const cursoBuscado = await this.obterPorId(id);
+
+    if (nome != cursoBuscado.nome) {
+      CursoValidator.validarNome(nome, listaDeCursos);
+    }
+
+    CursoValidator.validarAulas(aulas);
+
+    
+
+    let cursoAlterado: Curso = {
+      nome,
+      descricao,
+      aulas,
+      idProfessor
+    } as Curso 
+
+    await CursoRepository.alterar({ id }, cursoAlterado);
+
+    return new Mensagem('Curso alterado com sucesso!', {
       id,
     });
   }
@@ -73,9 +103,18 @@ export default class CursoController {
   async excluir(id: number) {
     Validador.validarParametros([{ id }]);
 
-    await CursoRepository.excluir({ id });
+    const listaDeCursos = await this.listar();
+    CursoValidator.validarIdDoCurso(id, listaDeCursos);
 
-    return new Mensagem('Aula excluido com sucesso!', {
+    const curso = await this.obterPorId(id);
+ 
+    if (!curso.alunosMatriculados || !curso.alunosMatriculados.length) {
+      await CursoRepository.excluir({ id });
+    } else {
+      throw new BusinessException('Não é possível excluir este curso. Há alunos matriculados.');
+    }
+
+    return new Mensagem('Curso excluido com sucesso!', {
       id,
     });
   }

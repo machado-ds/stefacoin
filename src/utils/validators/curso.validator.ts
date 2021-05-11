@@ -34,5 +34,23 @@ export const CursoValidator = {
             }
         })
         return true;
+    },
+
+    validarIdDoCurso: (idDoCurso: number, listaDeCursos: Curso[]) => {
+        let cursoEncontrado = undefined;
+        listaDeCursos.forEach(curso => {
+            if (curso.id === idDoCurso) {
+                cursoEncontrado = curso;
+                return;
+            }
+        })
+
+        if (!cursoEncontrado) {
+            throw new BusinessException('O curso informado não existe.');
+        } else {
+            return true;
+        }
+
+        
     }
 };
