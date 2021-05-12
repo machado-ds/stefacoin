@@ -1,9 +1,9 @@
-import Professor from '../../entities/professor.entity';
+import Aluno from '../../entities/professor.entity';
 import Usuario from '../../entities/usuario.entity';
 import BusinessException from '../exceptions/business.exception';
 import { UsuarioValidator } from './usuario.validator';
 
-export const ProfessorValidator = {
+export const AlunoValidator = {
     validarNome: (nome: string) => {
         UsuarioValidator.validarNome(nome);
     },
@@ -12,15 +12,16 @@ export const ProfessorValidator = {
        UsuarioValidator.validarEmail(emailInformado, usuarios);
     },
 
-    validarIdProfessor: (idProfessor: number, professores: Professor[]) => {
-        let professorEncontrado: Professor = undefined;
-        professores.forEach(professor => {
-            if (professor.id === idProfessor) {
-                professorEncontrado = professor;
+    validarIdAluno: (idAluno: number, alunos: Aluno[]) => {
+        let alunoEncontrado: Aluno = undefined;
+        alunos.forEach(aluno => {
+            if (aluno.id === idAluno) {
+                alunoEncontrado = aluno;
+                return;
             }
         })
-        if (!professorEncontrado) {
-            throw new BusinessException('O professor informado não existe.');
+        if (!alunoEncontrado) {
+            throw new BusinessException('O aluno informado não existe.');
         } else {
             return true;
         }

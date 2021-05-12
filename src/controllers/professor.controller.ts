@@ -1,10 +1,12 @@
 import Professor from '../entities/professor.entity';
+import Usuario from '../entities/usuario.entity';
 import ProfessorRepository from '../repositories/professor.repository';
 import { FilterQuery } from '../utils/database/database';
 import BusinessException from '../utils/exceptions/business.exception';
 import Mensagem from '../utils/mensagem';
 import { Validador } from '../utils/utils';
 import { ProfessorValidator } from '../utils/validators/professor.validator';
+import UsuarioRepository from '../repositories/usuario.repository';
 
 export default class ProfessorController {
   async obterPorId(id: number): Promise<Professor> {
@@ -39,8 +41,8 @@ export default class ProfessorController {
     senha = senha.trim();
 
     ProfessorValidator.validarNome(nome);
-    const professores: Professor[] = await this.listar();
-    ProfessorValidator.validarEmail(email, professores);
+    const usuarios: Usuario[] = await UsuarioRepository.listar();
+    ProfessorValidator.validarEmail(email, usuarios);
 
     //O método incluir do ProfessorRepository já está setando o tipo do usuário.
     //professor.tipo = 1;
@@ -48,7 +50,8 @@ export default class ProfessorController {
     let novoProfessor: Professor = {
       nome,
       email,
-      senha
+      senha,
+      cursos: []
     } as Professor 
 
     const id = await ProfessorRepository.incluir(novoProfessor);
@@ -59,24 +62,34 @@ export default class ProfessorController {
   }
 
   async alterar(id: number, professor: Professor) {
-    const nome = professor.nome.trim();
-    const email = professor.email.trim();
-    const senha = professor.email.trim();
+    let { nome, email, senha } = professor;
+    let campos = ["nome", "email", "senha"];
+    Validador.validarParametros([{ id }, { nome }, { senha }]);
+    nome = nome.trim();
+    senha = senha.trim();
 
     const professorBuscado = await this.obterPorId(id);
-
-    Validador.validarParametros([{ id }, { nome }, { email }, { senha }]);
+    const listaDeProfessores = await this.listar();
     ProfessorValidator.validarNome(nome);
-
-    if (email != professorBuscado.email) {
-      throw new BusinessException('O email não pode ser alterado.');
-    }
+    ProfessorValidator.validarIdProfessor(id, listaDeProfessores);
 
     let professorAlterado: Professor = {
       nome,
       email,
       senha
     } as Professor 
+
+    for (let i = 0; i < campos.length; i++) {
+      const prop = campos[i];
+      if (professor[prop] !== undefined) {
+        if (prop == 'email') {
+          throw new BusinessException('O email não pode ser alterado.');
+        }
+        professorAlterado[prop] = professor[prop];
+      } else {
+        professorAlterado[prop] = professorBuscado[prop];
+      }
+    }
 
     await ProfessorRepository.alterar({ id }, professorAlterado);
 
