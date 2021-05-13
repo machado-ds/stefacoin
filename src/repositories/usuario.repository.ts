@@ -6,6 +6,11 @@ class UsuarioRepository extends Repository<Usuario> {
   constructor() {
     super(Tables.USUARIO);
   }
+
+  async obterIdPeloEmail(email: string) {
+    const usuario: Usuario = await this.obter({email: {$eq: email}});
+    return usuario.id;
+  }
 }
 
 export default new UsuarioRepository();
