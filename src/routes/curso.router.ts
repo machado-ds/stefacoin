@@ -53,4 +53,13 @@ router.get('/cursos', async (req: Request, res: Response, next: NextFunction) =>
   }
 });
 
+router.post('/cursos/:id/matricula', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const mensagem: Mensagem = await new CursoController().matricular(id);
+  } catch (e) {
+    next(e);
+  }
+})
+
 export default router;

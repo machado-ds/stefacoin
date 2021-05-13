@@ -118,4 +118,12 @@ export default class CursoController {
       id,
     });
   }
+
+  async matricular(id: number) {
+    //Incluir o id do aluno no array de alunos matriculados no curso
+    //Incluir o id do curso no array de cursos do aluno
+    let curso = await this.obterPorId(id);
+    curso.alunosMatriculados.push()
+
+  }
 }
