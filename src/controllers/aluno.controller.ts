@@ -3,11 +3,10 @@ import AlunoRepository from '../repositories/aluno.repository';
 import { FilterQuery } from '../utils/database/database';
 import Mensagem from '../utils/mensagem';
 import { Validador } from '../utils/utils';
-import { TipoUsuario } from '../utils/tipo-usuario.enum';
 import { AlunoValidator } from '../utils/validators/aluno.validator';
 import UsuarioRepository from '../repositories/usuario.repository';
 import BusinessException from '../utils/exceptions/business.exception';
-import Curso from '../entities/curso.entity';
+
 
 export default class AlunoController {
   async obterPorId(id: number): Promise<Aluno> {
@@ -57,7 +56,6 @@ export default class AlunoController {
 
   async alterar(id: number, aluno: Aluno) {
     let { nome, email, senha, idade, formacao, cursos } = aluno;
-    let campos = ["nome", "email", "senha", "idade", "formacao", "cursos"];
     Validador.validarParametros([{ id }, { nome }, { senha }]);
 
     nome = nome.trim();
@@ -69,28 +67,26 @@ export default class AlunoController {
 
     const alunoBuscado = await this.obterPorId(id);
     
-    let alunoAlterado = {
-      nome,
-      email,
-      senha,
-      idade,
-      formacao,
-      cursos
-    } as Aluno;
+    alunoBuscado.nome = nome;
+    alunoBuscado.senha = senha;
 
-    for (let i = 0; i < campos.length; i++) {
-      const prop = campos[i];
-      if (aluno[prop] !== undefined) {
-        if (prop == 'email') {
-          throw new BusinessException('O email não pode ser alterado.');
-        }
-        alunoAlterado[prop] = aluno[prop];
-      } else {
-        alunoAlterado[prop] = alunoBuscado[prop];
-      }
+    if (email && email !== alunoBuscado.email) {
+      throw new BusinessException('O email não pode ser alterado.');
     }
 
-    await AlunoRepository.alterar({ id }, alunoAlterado);
+    if (idade) {
+      alunoBuscado.idade = idade;
+    }
+
+    if (formacao) {
+      alunoBuscado.formacao = formacao;
+    }
+
+    if (cursos) {
+      alunoBuscado.cursos = cursos;
+    }
+
+    await AlunoRepository.alterar({ id }, alunoBuscado);
     return new Mensagem('Aluno alterado com sucesso!', {
       id,
     });

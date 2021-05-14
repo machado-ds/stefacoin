@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import CursoController from '../controllers/curso.controller';
 import Curso from '../entities/curso.entity';
+import Avaliacao from '../models/avaliacao.model';
 import Mensagem from '../utils/mensagem';
 
 const router = express.Router();
@@ -53,10 +54,34 @@ router.get('/cursos', async (req: Request, res: Response, next: NextFunction) =>
   }
 });
 
-router.post('/cursos/:id/matricula', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/cursos/:cursoId/matricula', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const mensagem: Mensagem = await new CursoController().matricular(id);
+    const { cursoId } = req.params;
+    const { alunoId } = req.query;
+    const mensagem: Mensagem = await new CursoController().matricular(Number(cursoId), Number(alunoId));
+    res.json(mensagem);
+  } catch (e) {
+    next(e);
+  }
+})
+
+router.put('/cursos/:cursoId/cancelarMatricula', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { cursoId } = req.params;
+    const { alunoId } = req.query;
+    const mensagem: Mensagem = await new CursoController().cancelarMatricula(Number(cursoId), Number(alunoId));
+    res.json(mensagem);
+  } catch (e) {
+    next(e);
+  }
+})
+
+router.put('/cursos/:cursoId/avaliar', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { cursoId } = req.params;
+    const avaliacao: Avaliacao = req.body;
+    const mensagem: Mensagem = await new CursoController().avaliar(Number(cursoId), avaliacao);
+    res.json(mensagem);
   } catch (e) {
     next(e);
   }

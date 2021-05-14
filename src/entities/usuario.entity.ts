@@ -5,7 +5,7 @@ export default class Usuario extends Entity {
   email: string;
   senha: string;
   nome: string;
-  cursos?: Curso[];
+  cursos?: number[];
 
   tipo: number; // 1 - Professor    2 - Aluno
 

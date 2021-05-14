@@ -1,16 +1,23 @@
 import Aula from '../models/aula.model';
-import Aluno from '../entities/aluno.entity';
+import Avaliacao from '../models/avaliacao.model';
 import Entity from './entity';
+
 
 export default class Curso extends Entity {
   nome: string;
   descricao: string;
   idProfessor?: number;
   aulas?: Aula[];
-  alunosMatriculados?: Aluno[];
-  avaliacao: number;
+  alunosMatriculados?: number[];
+  avaliacao?: Avaliacao[];
 
   constructor() {
     super();
+  }
+
+  getMediaAvaliacao() {
+    let somaDasNotas = 0;
+    this.avaliacao.forEach(avaliacao => somaDasNotas += avaliacao.nota);
+    return somaDasNotas / this.avaliacao.length;
   }
 }

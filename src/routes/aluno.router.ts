@@ -52,7 +52,7 @@ router.get('/alunos', async (req: Request, res: Response, next: NextFunction) =>
       let {senha, ...alunoSemSenha} = aluno;
       return alunoSemSenha as Aluno;
     })
-    res.json(alunosSemSenha);
+    res.json(alunos);
   } catch (e) {
     next(e);
   }
