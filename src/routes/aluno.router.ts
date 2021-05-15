@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import AlunoController from '../controllers/aluno.controller';
 import Aluno from '../entities/aluno.entity';
+import Curso from '../entities/curso.entity';
 import Mensagem from '../utils/mensagem';
 import { TipoUsuario } from '../utils/tipo-usuario.enum';
 
@@ -45,6 +46,18 @@ router.get('/alunos/:id', async (req: Request, res: Response, next: NextFunction
   }
 });
 
+router.get('/alunos/:id/cursos', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const cursos: Curso[] = await new AlunoController().obterCursos(Number(id));
+    res.json(cursos);
+  } catch (e) {
+    next(e);
+  }
+});
+
+
+
 router.get('/alunos', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const alunos: Aluno[] = await new AlunoController().listar({tipo: {$eq: TipoUsuario.ALUNO}});
@@ -52,7 +65,7 @@ router.get('/alunos', async (req: Request, res: Response, next: NextFunction) =>
       let {senha, ...alunoSemSenha} = aluno;
       return alunoSemSenha as Aluno;
     })
-    res.json(alunos);
+    res.json(alunosSemSenha);
   } catch (e) {
     next(e);
   }

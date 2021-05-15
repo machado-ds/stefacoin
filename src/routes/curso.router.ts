@@ -15,6 +15,15 @@ router.post('/cursos', async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
+router.post('/cursos/nome-disponivel', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+     const nomeCursoDisponivel: boolean = await new CursoController().checarNomeCursoDisponivel(req.body.nomeCurso);
+     res.json(nomeCursoDisponivel);
+  } catch (erro) {
+      next(erro);
+  }
+})
+
 router.put('/cursos/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;

@@ -30,7 +30,6 @@ export default class AulaController {
   async incluir(aula: Aula) {
     let { nome, duracao, topicos, idCurso } = aula;
 
-    //Checar se o nome já existe, se os tópicos estão em forma de lista e se o id do curso existe.
     Validador.validarParametros([{ nome }, { duracao }, { topicos }, { idCurso }]);
 
     nome = nome.trim();

@@ -14,10 +14,4 @@ export default class Curso extends Entity {
   constructor() {
     super();
   }
-
-  getMediaAvaliacao() {
-    let somaDasNotas = 0;
-    this.avaliacao.forEach(avaliacao => somaDasNotas += avaliacao.nota);
-    return somaDasNotas / this.avaliacao.length;
-  }
 }

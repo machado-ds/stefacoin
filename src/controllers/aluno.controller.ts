@@ -6,6 +6,7 @@ import { Validador } from '../utils/utils';
 import { AlunoValidator } from '../utils/validators/aluno.validator';
 import UsuarioRepository from '../repositories/usuario.repository';
 import BusinessException from '../utils/exceptions/business.exception';
+import CursoController from '../controllers/curso.controller';
 
 
 export default class AlunoController {
@@ -19,7 +20,6 @@ export default class AlunoController {
   }
 
   // #pegabandeira
-  //Assim como no caso do professor, esse método tá devolvendo uma lista de usuários, com profs e alunos, além de devolver a senha de cada um deles.
   async listar(filtro: FilterQuery<Aluno> = {}): Promise<Aluno[]> {
     return await AlunoRepository.listar(filtro);
   }
@@ -68,7 +68,12 @@ export default class AlunoController {
     const alunoBuscado = await this.obterPorId(id);
     
     alunoBuscado.nome = nome;
-    alunoBuscado.senha = senha;
+
+    if (alunoBuscado.senha === senha) {
+      alunoBuscado.senha = undefined;
+    } else {
+      alunoBuscado.senha = senha;
+    }
 
     if (email && email !== alunoBuscado.email) {
       throw new BusinessException('O email não pode ser alterado.');
@@ -107,5 +112,15 @@ export default class AlunoController {
     return new Mensagem('Aluno excluido com sucesso!', {
       id,
     });
+  }
+
+  async obterCursos(id: number) {
+    const listaDeAlunos = await this.listar();
+    AlunoValidator.validarIdAluno(id, listaDeAlunos);
+
+    const aluno = await this.obterPorId(id);
+    const cursos = await new CursoController().listar();
+
+    return cursos.filter(curso => curso.alunosMatriculados.includes(id));
   }
 }

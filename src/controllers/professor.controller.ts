@@ -20,17 +20,11 @@ export default class ProfessorController {
   }
 
   // #pegabandeira
-  /*
-   * Esse método está retornando dados sensíveis do usuário e está retornando Alunos e Professores. Resolvi
-   * o primeiro problema no método get da rota, criando e devolvendo uma nova lista de Professores, mas sem
-   * o campo senha. Resolvi o segundo problema alterando a Table do ProfessorRepository para 'PROFESSOR'
-  */
   async listar(filtro: FilterQuery<Professor> = {}): Promise<Professor[]> {
     return await ProfessorRepository.listar(filtro);
   }
 
   // #pegabandeira
-  // Ainda não consegui identificar esse #pegabandeira --- ATT: Talvez o peguinha seja o fato do tipo estar sendo setado no ProfessorRepository e por isso não há necessidade de setar aqui. Porém, não tenho certeza se é isso. Ainda preciso fazer as validações dos campos, então talvez seja isso também. --- ATT2: Descobri que é possível inserir dados que não estão presentes na entidade Professor. Exemplo, na requisição eu posso passar um telefone apesar de o atributo telefone não existir na entidade Professor. Acredito que esse seja o verdadeiro #pegabandeira
   async incluir(professor: Professor) {
     let { nome, email, senha } = professor;
     
@@ -62,8 +56,7 @@ export default class ProfessorController {
   }
 
   async alterar(id: number, professor: Professor) {
-    let { nome, email, senha } = professor;
-    let campos = ["nome", "email", "senha"];
+    let { nome, email, senha, cursos } = professor;
     Validador.validarParametros([{ id }, { nome }, { senha }]);
     nome = nome.trim();
     senha = senha.trim();
@@ -73,25 +66,23 @@ export default class ProfessorController {
     ProfessorValidator.validarNome(nome);
     ProfessorValidator.validarIdProfessor(id, listaDeProfessores);
 
-    let professorAlterado: Professor = {
-      nome,
-      email,
-      senha
-    } as Professor 
+    professorBuscado.nome = nome;
 
-    for (let i = 0; i < campos.length; i++) {
-      const prop = campos[i];
-      if (professor[prop] !== undefined) {
-        if (prop == 'email') {
-          throw new BusinessException('O email não pode ser alterado.');
-        }
-        professorAlterado[prop] = professor[prop];
-      } else {
-        professorAlterado[prop] = professorBuscado[prop];
-      }
+    if (professorBuscado.senha === senha) {
+      professorBuscado.senha = undefined;
+    } else {
+      professorBuscado.senha = senha;
     }
 
-    await ProfessorRepository.alterar({ id }, professorAlterado);
+    if (email && email !== professorBuscado.email) {
+      throw new BusinessException('O email não pode ser alterado.');
+    }
+
+    if (cursos) {
+      professorBuscado.cursos = cursos;
+    }
+    
+    await ProfessorRepository.alterar({ id }, professorBuscado);
 
     return new Mensagem('Professor alterado com sucesso!', {
       id,

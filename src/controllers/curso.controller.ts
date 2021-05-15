@@ -4,14 +4,10 @@ import { FilterQuery } from '../utils/database/database';
 import Mensagem from '../utils/mensagem';
 import { Validador } from '../utils/utils';
 import { CursoValidator } from '../utils/validators/curso.validator';
-import AulaController from '../controllers/aula.controller';
 import ProfessorRepository from '../repositories/professor.repository';
-import { AulaValidator } from '../utils/validators/aula.validator';
 import BusinessException from '../utils/exceptions/business.exception';
-import Aluno from '../entities/aluno.entity';
 import AlunoController from './aluno.controller';
 import alunoRepository from '../repositories/aluno.repository';
-import usuarioRepository from '../repositories/usuario.repository';
 import { AlunoValidator } from '../utils/validators/aluno.validator';
 import Avaliacao from '../models/avaliacao.model';
 
@@ -35,7 +31,6 @@ export default class CursoController {
   async incluir(curso: Curso) {
     let { nome, descricao, aulas, idProfessor } = curso;
 
-    //Preciso validar se as aulas são um array e se o id do professor existe.
     Validador.validarParametros([{ nome }, { descricao }, { aulas }, { idProfessor }]);
 
     nome = nome.trim();
@@ -51,19 +46,13 @@ export default class CursoController {
     let novoCurso: Curso = {
       nome,
       descricao,
-      aulas: [],
+      aulas,
       idProfessor,
       alunosMatriculados: [],
       avaliacao: [],
     } as Curso 
 
     const id = await CursoRepository.incluir(novoCurso);
-
-    for (let index = 0; index < aulas.length; index++) {
-      const aula = aulas[index];
-      aula.idCurso = id;
-      await new AulaController().incluir(aula);
-    }
 
     return new Mensagem('Curso incluido com sucesso!', {
       id,
@@ -129,8 +118,6 @@ export default class CursoController {
   }
 
   async matricular(cursoId: number, alunoId: number) {
-    //Incluir o id do aluno no array de alunos matriculados no curso
-    //Incluir o id do curso no array de cursos do aluno
     const listaDeCursos = await this.listar();
     CursoValidator.validarIdDoCurso(cursoId, listaDeCursos);
     const listaDeAlunos = await new AlunoController().listar();
@@ -158,8 +145,6 @@ export default class CursoController {
   }
 
   async cancelarMatricula(cursoId: number, alunoId: number) {
-    //Incluir o id do aluno no array de alunos matriculados no curso
-    //Incluir o id do curso no array de cursos do aluno
     const listaDeCursos = await this.listar();
     CursoValidator.validarIdDoCurso(cursoId, listaDeCursos);
     const listaDeAlunos = await new AlunoController().listar();
@@ -187,8 +172,6 @@ export default class CursoController {
   }
 
   async avaliar(cursoId: number, avaliacao: Avaliacao) {
-    //Incluir o id do aluno no array de alunos matriculados no curso
-    //Incluir o id do curso no array de cursos do aluno
     const listaDeCursos = await this.listar();
     CursoValidator.validarIdDoCurso(cursoId, listaDeCursos);
     const listaDeAlunos = await new AlunoController().listar();
@@ -221,6 +204,20 @@ export default class CursoController {
       avaliacao
     });
   }
+
+  async checarNomeCursoDisponivel(nomeCurso: string) {
+    if (nomeCurso) {
+        const listaDeCursos = await CursoRepository.listar();
+        try {
+            CursoValidator.validarNome(nomeCurso, listaDeCursos);
+            return true;
+        } catch (erro) {
+            return false;
+        }
+    }
+
+    throw new BusinessException('É necessário informar o nome do curso para verificar a sua disponibilidade.');
+}
 
   
 }

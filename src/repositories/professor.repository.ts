@@ -19,6 +19,9 @@ class ProfessorRepository extends Repository<Professor> {
   async alterar(filtro: FilterQuery<Professor>, professor: Professor) {
     if (professor.senha) {
       professor.senha = Validador.criptografarSenha(professor.senha);
+    } else {
+      const professorBuscado = await super.obterPorId(professor.id);
+      professor.senha = professorBuscado.senha;
     }
     return super.alterar(filtro, professor);
   }
